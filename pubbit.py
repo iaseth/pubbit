@@ -30,15 +30,9 @@ def create_epub_structure(base_dir):
 		f.write("application/epub+zip")
 
 	# container.xml
-	container_xml = """<?xml version="1.0"?>
-<container version="1.0"
-		   xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
-  <rootfiles>
-	<rootfile full-path="OEBPS/content.opf"
-			  media-type="application/oebps-package+xml"/>
-  </rootfiles>
-</container>
-"""
+	with open('static/container.xml') as f:
+		container_xml = f.read()
+
 	with open(base_dir / "META-INF" / "container.xml", "w", encoding="utf-8") as f:
 		f.write(container_xml)
 
