@@ -38,7 +38,9 @@ def md_to_html(md_path):
 		return markdown.markdown(f.read(), extensions=["fenced_code", "toc"])
 
 def create_epub_structure(base_dir):
-	shutil.rmtree(base_dir)
+	if base_dir.is_dir():
+		shutil.rmtree(base_dir)
+
 	(base_dir / "META-INF").mkdir(parents=True, exist_ok=True)
 	(base_dir / "OEBPS").mkdir(exist_ok=True)
 

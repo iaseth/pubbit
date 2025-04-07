@@ -18,8 +18,16 @@ LOREM = [
 	"Fusce suscipit varius mi. Cum sociis natoque penatibus et magnis dis parturient."
 ]
 
+def generate_random_paragraph(lines=5):
+	return " ".join(random.choice(LOREM) for _ in range(lines))
+
 def generate_paragraphs(num=3):
-	return "\n\n".join(random.choice(LOREM) for _ in range(num))
+	paragraphs = []
+	for i in range(num):
+		lines = random.randint(1, 10)
+		paragraph = generate_random_paragraph(lines)
+		paragraphs.append(paragraph)
+	return "\n\n".join(paragraphs)
 
 def generate_sample_md_dir(dirname: str, number_of_chapters: int):
 	base = Path(dirname)
@@ -28,7 +36,8 @@ def generate_sample_md_dir(dirname: str, number_of_chapters: int):
 	for i in range(1, number_of_chapters + 1):
 		chapter_title = f"Chapter {i}"
 		filename = base / f"{i:02d}_{chapter_title.replace(' ', '_').lower()}.md"
-		content = f"# {chapter_title}\n\n{generate_paragraphs(50)}\n"
+		para_count = random.randint(50, 200)
+		content = f"# {chapter_title}\n\n{generate_paragraphs(para_count)}\n"
 		with open(filename, "w", encoding="utf-8") as f:
 			f.write(content)
 
