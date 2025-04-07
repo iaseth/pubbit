@@ -9,10 +9,26 @@ from pathlib import Path
 import markdown
 from jinja2 import Environment, FileSystemLoader
 
+
+
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 
 env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
 env.globals['enumerate'] = enumerate
+env.trim_blocks = True
+env.lstrip_blocks = True
+
+
+class EpubChapter:
+	def __init__(self, markdown_filepath):
+		self.markdown_filepath = markdown_filepath
+		self.markdown_filename = os.path.basename(markdown_filepath)
+		self.uuid = uuid.uuid4()
+
+	@property
+	def output_filepath(self):
+		return f"texts/text-{self.uuid}.xhtml"
+
 
 def get_markdown_files(directory):
 	return sorted(Path(directory).rglob("*.md"))
@@ -22,6 +38,7 @@ def md_to_html(md_path):
 		return markdown.markdown(f.read(), extensions=["fenced_code", "toc"])
 
 def create_epub_structure(base_dir):
+	shutil.rmtree(base_dir)
 	(base_dir / "META-INF").mkdir(parents=True, exist_ok=True)
 	(base_dir / "OEBPS").mkdir(exist_ok=True)
 
@@ -43,15 +60,20 @@ def create_epub_from_markdown(md_files, output_filename="output.epub", title="Co
 	temp_dir = Path("temp_epub")
 	create_epub_structure(temp_dir)
 	oebps_dir = temp_dir / "OEBPS"
+	(oebps_dir / "texts").mkdir(exist_ok=True)
 
 	uid = str(uuid.uuid4())
-	chapter_titles = []
+
+	chapters = []
 	for i, md_file in enumerate(md_files):
+		chapter = EpubChapter(md_file)
+		chapters.append(chapter)
+
 		chapter_title = md_file.stem
-		chapter_titles.append(chapter_title)
 		html = md_to_html(md_file)
 		chapter_content = render_template("chapter.xhtml.j2", title=chapter_title, content=html)
-		with open(oebps_dir / f"chap{i}.xhtml", "w", encoding="utf-8") as f:
+
+		with open(oebps_dir / chapter.output_filepath, "w", encoding="utf-8") as f:
 			f.write(chapter_content)
 
 	# Write OPF
@@ -60,7 +82,7 @@ def create_epub_from_markdown(md_files, output_filename="output.epub", title="Co
 		title=title,
 		uid=uid,
 		author=author,
-		chapter_count=len(md_files)
+		chapters=chapters
 	)
 	with open(oebps_dir / "content.opf", "w", encoding="utf-8") as f:
 		f.write(content_opf)
@@ -70,7 +92,7 @@ def create_epub_from_markdown(md_files, output_filename="output.epub", title="Co
 		"toc.ncx.j2",
 		uid=uid,
 		title=title,
-		chapter_titles=chapter_titles
+		chapters=chapters
 	)
 	with open(oebps_dir / "toc.ncx", "w", encoding="utf-8") as f:
 		f.write(toc_ncx)

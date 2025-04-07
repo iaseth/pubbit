@@ -6,10 +6,10 @@
 	</head>
 	<docTitle><text>{{ title }}</text></docTitle>
 	<navMap>
-		{% for i, chapter_title in enumerate(chapter_titles) %}
+		{% for i, chapter in enumerate(chapters) %}
 		<navPoint id="navPoint-{{ i+1 }}" playOrder="{{ i+1 }}">
-			<navLabel><text>{{ chapter_title }}</text></navLabel>
-			<content src="chap{{ i }}.xhtml"/>
+			<navLabel><text>{{ chapter.markdown_filename }}</text></navLabel>
+			<content src="{{ chapter.output_filepath }}"/>
 		</navPoint>
 		{% endfor %}
 	</navMap>
