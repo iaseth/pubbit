@@ -6,3 +6,6 @@ dummy/
 
 *.pyc
 *.zip
+
+*.epub
+*.azw3
